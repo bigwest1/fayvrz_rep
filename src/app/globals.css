@@ -1,16 +1,46 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f7f7f5;
-  --foreground: #0c0c0c;
-  --border: #e4e1da;
+  --color-canvas: #f6f4f0;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1eee7;
+  --color-border: #e3dfd6;
+  --color-border-strong: #cfc9bc;
+  --color-text: #0f1115;
+  --color-text-muted: #2f3239;
+  --color-accent-calm: #dfe9e2;
+  --color-accent-contrast: #111827;
+
+  --space-xs: 0.375rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 2.75rem;
+
+  --radius-xs: 0.35rem;
+  --radius-sm: 0.55rem;
+  --radius-md: 0.85rem;
+  --radius-lg: 1.15rem;
+  --radius-xl: 1.5rem;
+
+  --shadow-subtle: 0 6px 18px rgba(17, 24, 39, 0.05);
+  --shadow-lifted: 0 10px 28px rgba(17, 24, 39, 0.08);
+  --shadow-overlay: 0 16px 44px rgba(17, 24, 39, 0.12);
+
+  --motion-fast: 120ms;
+  --motion-base: 180ms;
+  --motion-gentle: 240ms;
+  --motion-ease-standard: cubic-bezier(0.33, 1, 0.68, 1);
+  --motion-ease-subtle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --motion-ease-entrance: cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-border: var(--border);
-  --font-sans: var(--font-space-grotesk);
+  --color-background: var(--color-canvas);
+  --color-foreground: var(--color-text);
+  --color-border: var(--color-border);
+  --font-sans: var(--font-public-sans);
   --font-mono: var(--font-plex-mono);
 }
 
@@ -20,9 +50,9 @@
 
 body {
   margin: 0;
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-space-grotesk), system-ui, -apple-system, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-text);
+  font-family: var(--font-public-sans), system-ui, -apple-system, sans-serif;
 }
 
 a {
@@ -31,8 +61,47 @@ a {
 }
 
 :focus-visible {
-  outline: 2px solid #0f172a;
+  outline: 2px solid var(--color-accent-contrast);
   outline-offset: 2px;
+}
+
+.type-headline {
+  font-weight: 600;
+  font-size: clamp(2.25rem, 2.6vw + 1rem, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.type-section {
+  font-weight: 600;
+  font-size: clamp(1.5rem, 1.2vw + 1rem, 2rem);
+  line-height: 1.2;
+}
+
+.type-body {
+  font-weight: 400;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--color-text-muted);
+}
+
+.type-meta {
+  font-weight: 600;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-subtle);
+}
+
+.surface-muted {
+  background: var(--color-surface-muted);
 }
 
 @media (prefers-reduced-motion: reduce) {

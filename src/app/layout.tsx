@@ -1,17 +1,19 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, Public_Sans } from "next/font/google";
 import "./globals.css";
 
-const spaceGrotesk = Space_Grotesk({
+const publicSans = Public_Sans({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
+  variable: "--font-public-sans",
   weight: ["400", "500", "600", "700"],
+  display: "swap",
 });
 
 const plexMono = IBM_Plex_Mono({
   subsets: ["latin"],
   variable: "--font-plex-mono",
   weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -28,10 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${plexMono.variable}`}
+      className={`${publicSans.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
-      <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased">
+      <body className="min-h-screen bg-[color:var(--color-canvas)] text-[color:var(--color-text)] antialiased">
         <div className="flex min-h-screen flex-col">{children}</div>
       </body>
     </html>
