@@ -1,10 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { getClerkAuth } from "@/lib/auth.server";
+import { getDbUser } from "@/lib/auth.server";
 
 export async function GET() {
-  const { userId } = auth();
+  const { userId: clerkUserId } = getClerkAuth();
+  const dbUser = await getDbUser();
 
   return Response.json({
-    authenticated: Boolean(userId),
-    ...(userId ? { userId } : {}),
+    authenticated: Boolean(clerkUserId),
+    ...(clerkUserId ? { clerkUserId } : {}),
+    ...(dbUser ? { dbUserId: dbUser.id } : {}),
   });
 }

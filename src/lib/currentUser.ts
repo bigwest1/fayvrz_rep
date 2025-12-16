@@ -1,57 +1,64 @@
-import { auth, clerkClient, currentUser as clerkCurrentUser } from "@clerk/nextjs/server";
+import { prisma } from "./prisma";
 import {
   defaultProfileSignals,
-  type ProfileSignals,
   sanitizeProfileSignals,
+  type ProfileSignals,
 } from "./profileSignals";
+import { getDbUser, requireDbUser } from "./auth.server";
 
 export async function getCurrentUser() {
-  return clerkCurrentUser();
+  return getDbUser();
 }
 
 export async function requireUser() {
-  const user = await getCurrentUser();
-  if (!user) {
-    throw new Error("Unauthorized");
-  }
-  return user;
+  return requireDbUser();
 }
 
 export async function getProfileSignals(): Promise<ProfileSignals> {
-  const user = await getCurrentUser();
-
+  const user = await getDbUser();
   if (!user) {
     return defaultProfileSignals;
   }
 
-  const storedSignals = (user.publicMetadata?.profileSignals ?? {}) as Partial<ProfileSignals>;
+  const profile = await prisma.profileSignals.findUnique({
+    where: { userId: user.id },
+  });
+
   const fallbackName =
-    storedSignals.displayName ||
-    user.fullName ||
-    user.firstName ||
-    user.username ||
+    profile?.displayName ||
+    user.displayName ||
     defaultProfileSignals.displayName;
 
   return sanitizeProfileSignals({
     ...defaultProfileSignals,
-    ...storedSignals,
+    ...profile,
     displayName: fallbackName,
   });
 }
 
 export async function updateProfileSignals(signals: ProfileSignals) {
   "use server";
-  const { userId } = auth();
-
-  if (!userId) {
-    throw new Error("Unauthorized");
-  }
-
+  const user = await requireDbUser();
   const cleaned = sanitizeProfileSignals(signals);
 
-  await clerkClient.users.updateUserMetadata(userId, {
-    publicMetadata: {
-      profileSignals: cleaned,
+  await prisma.profileSignals.upsert({
+    where: { userId: user.id },
+    create: {
+      userId: user.id,
+      displayName: cleaned.displayName,
+      ageBand: cleaned.ageBand,
+      homeContext: cleaned.homeContext,
+      location: cleaned.location,
+      incomeBand: cleaned.incomeBand,
+      preferences: cleaned.preferences ?? {},
+    },
+    update: {
+      displayName: cleaned.displayName,
+      ageBand: cleaned.ageBand,
+      homeContext: cleaned.homeContext,
+      location: cleaned.location,
+      incomeBand: cleaned.incomeBand,
+      preferences: cleaned.preferences ?? {},
     },
   });
 

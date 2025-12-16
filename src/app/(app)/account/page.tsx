@@ -1,9 +1,5 @@
 import { AppShell } from "@/components/layout/AppShell";
-import {
-  getProfileSignals,
-  requireUser,
-  updateProfileSignals,
-} from "@/lib/currentUser";
+import { getProfileSignals, requireUser, updateProfileSignals } from "@/lib/currentUser";
 import type { AgeBand, HomeContext, IncomeBand } from "@/lib/profileSignals";
 
 const ageBandOptions: { label: string; value: AgeBand }[] = [
