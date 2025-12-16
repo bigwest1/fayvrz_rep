@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Public_Sans } from "next/font/google";
+import { Atkinson_Hyperlegible, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
-const publicSans = Public_Sans({
+const atkinson = Atkinson_Hyperlegible({
   subsets: ["latin"],
-  variable: "--font-public-sans",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-atkinson",
+  weight: ["400", "700"],
   display: "swap",
 });
 
@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${publicSans.variable} ${plexMono.variable}`}
+      className={`${atkinson.variable} ${plexMono.variable}`}
       suppressHydrationWarning
     >
       <body className="min-h-screen bg-[color:var(--color-canvas)] text-[color:var(--color-text)] antialiased">

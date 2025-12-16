@@ -1,32 +1,32 @@
 @import "tailwindcss";
 
 :root {
-  --color-canvas: #f6f4f0;
+  --color-canvas: #f4f1e9;
   --color-surface: #ffffff;
-  --color-surface-muted: #f1eee7;
-  --color-border: #e3dfd6;
-  --color-border-strong: #cfc9bc;
-  --color-text: #0f1115;
-  --color-text-muted: #2f3239;
-  --color-accent-calm: #dfe9e2;
-  --color-accent-contrast: #111827;
+  --color-surface-muted: #eeeadf;
+  --color-border: #ddd4c5;
+  --color-border-strong: #c7baa6;
+  --color-text: #111418;
+  --color-text-muted: #343a40;
+  --color-accent-calm: #d9e4dc;
+  --color-accent-contrast: #0f1720;
 
-  --space-xs: 0.375rem;
+  --space-xs: 0.4rem;
   --space-sm: 0.75rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 2.75rem;
+  --space-md: 1.1rem;
+  --space-lg: 1.6rem;
+  --space-xl: 2.15rem;
+  --space-2xl: 2.85rem;
 
   --radius-xs: 0.35rem;
-  --radius-sm: 0.55rem;
-  --radius-md: 0.85rem;
-  --radius-lg: 1.15rem;
-  --radius-xl: 1.5rem;
+  --radius-sm: 0.65rem;
+  --radius-md: 0.95rem;
+  --radius-lg: 1.2rem;
+  --radius-xl: 1.45rem;
 
-  --shadow-subtle: 0 6px 18px rgba(17, 24, 39, 0.05);
-  --shadow-lifted: 0 10px 28px rgba(17, 24, 39, 0.08);
-  --shadow-overlay: 0 16px 44px rgba(17, 24, 39, 0.12);
+  --shadow-subtle: 0 5px 16px rgba(15, 23, 32, 0.05);
+  --shadow-lifted: 0 10px 28px rgba(15, 23, 32, 0.08);
+  --shadow-overlay: 0 16px 42px rgba(15, 23, 32, 0.12);
 
   --motion-fast: 120ms;
   --motion-base: 180ms;
@@ -34,17 +34,24 @@
   --motion-ease-standard: cubic-bezier(0.33, 1, 0.68, 1);
   --motion-ease-subtle: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --motion-ease-entrance: cubic-bezier(0.22, 0.61, 0.36, 1);
+
+  --font-display: var(--font-atkinson);
+  --font-body: var(--font-atkinson);
+  --font-mono: var(--font-plex-mono, ui-monospace);
 }
 
 @theme inline {
   --color-background: var(--color-canvas);
   --color-foreground: var(--color-text);
   --color-border: var(--color-border);
-  --font-sans: var(--font-public-sans);
+  --font-sans: var(--font-atkinson);
   --font-mono: var(--font-plex-mono);
 }
 
-* {
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
   font-feature-settings: "ss01" on, "cv02" on;
 }
 
@@ -52,7 +59,9 @@ body {
   margin: 0;
   background: var(--color-canvas);
   color: var(--color-text);
-  font-family: var(--font-public-sans), system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
 a {
@@ -60,35 +69,49 @@ a {
   text-decoration: none;
 }
 
+::selection {
+  background: var(--color-accent-calm);
+  color: var(--color-text);
+}
+
 :focus-visible {
   outline: 2px solid var(--color-accent-contrast);
-  outline-offset: 2px;
+  outline-offset: 3px;
+  border-radius: var(--radius-xs);
 }
 
 .type-headline {
-  font-weight: 600;
-  font-size: clamp(2.25rem, 2.6vw + 1rem, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
+  font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2.4rem, 2.6vw + 1.2rem, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.018em;
+  color: var(--color-text);
 }
 
 .type-section {
-  font-weight: 600;
-  font-size: clamp(1.5rem, 1.2vw + 1rem, 2rem);
-  line-height: 1.2;
+  font-family: var(--font-display), system-ui, -apple-system, sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 1.4vw + 1.05rem, 2.3rem);
+  line-height: 1.15;
+  letter-spacing: -0.012em;
+  color: var(--color-text);
 }
 
 .type-body {
+  font-family: var(--font-body), system-ui, -apple-system, sans-serif;
   font-weight: 400;
-  font-size: 1rem;
-  line-height: 1.6;
+  font-size: 1.02rem;
+  line-height: 1.65;
   color: var(--color-text-muted);
 }
 
 .type-meta {
+  font-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   font-weight: 600;
-  font-size: 0.75rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-text-muted);
 }
@@ -106,9 +129,9 @@ a {
 
 @media (prefers-reduced-motion: reduce) {
   * {
-    animation-duration: 0.01ms !important;
+    animation-duration: 0ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-duration: 0ms !important;
     scroll-behavior: auto !important;
   }
 }

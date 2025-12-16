@@ -1,36 +1,36 @@
 export const colors = {
-  canvas: "#f6f4f0",
+  canvas: "#f4f1e9",
   surface: "#ffffff",
-  surfaceMuted: "#f1eee7",
-  border: "#e3dfd6",
-  borderStrong: "#cfc9bc",
-  text: "#0f1115",
-  textMuted: "#2f3239",
-  accentCalm: "#dfe9e2",
-  accentContrast: "#111827",
+  surfaceMuted: "#eeeadf",
+  border: "#ddd4c5",
+  borderStrong: "#c7baa6",
+  text: "#111418",
+  textMuted: "#343a40",
+  accentCalm: "#d9e4dc",
+  accentContrast: "#0f1720",
 } as const;
 
 export const spacing = {
-  xs: "0.375rem",
+  xs: "0.4rem",
   sm: "0.75rem",
-  md: "1rem",
-  lg: "1.5rem",
-  xl: "2rem",
-  "2xl": "2.75rem",
+  md: "1.1rem",
+  lg: "1.6rem",
+  xl: "2.15rem",
+  "2xl": "2.85rem",
 } as const;
 
 export const radii = {
   xs: "0.35rem",
-  sm: "0.55rem",
-  md: "0.85rem",
-  lg: "1.15rem",
-  xl: "1.5rem",
+  sm: "0.65rem",
+  md: "0.95rem",
+  lg: "1.2rem",
+  xl: "1.45rem",
 } as const;
 
 export const elevation = {
-  subtle: "0 6px 18px rgba(17, 24, 39, 0.05)",
-  lifted: "0 10px 28px rgba(17, 24, 39, 0.08)",
-  overlay: "0 16px 44px rgba(17, 24, 39, 0.12)",
+  subtle: "0 5px 16px rgba(15, 23, 32, 0.05)",
+  lifted: "0 10px 28px rgba(15, 23, 32, 0.08)",
+  overlay: "0 16px 42px rgba(15, 23, 32, 0.12)",
 } as const;
 
 export const motion = {
