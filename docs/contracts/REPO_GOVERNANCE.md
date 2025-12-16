@@ -1,26 +1,23 @@
 # Repo Governance
 
-## Folder Structure & Naming
-- `src/app/(marketing)` for public marketing routes; `src/app/(app)` for authenticated app views; `src/app/api` for Route Handlers; shared components in `src/components/**`; utilities in `src/lib`; long-form content in `src/content`; styles in `src/styles`.
-- Use kebab-case for routes and folder names; use PascalCase for React components; keep files focused and small.
-- README.md lives in new folders to clarify purpose and constraints.
+## Folder Structure and Naming
+- `src/app/(marketing)` for public pages; `src/app/(app)` for authenticated app; `src/app/api` for route handlers.
+- `src/components/` for shared UI; subfolders per domain: `layout/`, `marketing/`, `life-events/`.
+- `src/lib/` for utilities; `src/content/` for structured content; `src/styles/` for global styles/tokens.
+- Use kebab-case for folders, PascalCase for React components, camelCase for helpers.
 
 ## Server-First Rules
-- Default to Server Components for pages/layouts; render data on the server and stream where helpful.
-- Keep business logic server-side; prefer Route Handlers or server actions over client-side fetching.
-- Avoid exposing secrets to the client; environment references stay on the server.
+- Prefer Server Components; fetch and process data on the server.
+- Only opt into Client Components when stateful UI or browser APIs are required; keep surface small.
 
 ## Client Component Rules
-- Add `"use client"` only when interactive state or browser APIs are needed.
-- Keep client bundles small: isolate interactive widgets, avoid lifting heavy logic into the client, and share types via `src/lib`.
-- Do not wrap entire pages in client components; compose client pieces into server-rendered shells.
+- Mark with `"use client"` only when needed; isolate client logic in leaf components.
+- Avoid client-only data fetching when server routes suffice; pass serialized props.
 
 ## Animation Rules
-- Animations must be purposeful and subtle; disable or minimize when `prefers-reduced-motion` is set.
-- Avoid gratuitous motion on page load; favor micro-interactions tied to user intent.
-- No gradients or neon color shifts; use opacity and movement sparingly.
+- Animations must be purposeful, subtle, and disabled/respected via `prefers-reduced-motion`.
+- No gradients or neon palettes; rely on typography, spacing, and borders.
 
 ## Commit Conventions
-- Small, focused commits with imperative, lowercase subjects (e.g., `chore: add layout shell`).
-- Include scope prefixes (`feat`, `chore`, `docs`, `fix`, etc.) and keep bodies concise.
-- Do not commit secrets; `.env.example` documents required variables.
+- Small, focused commits with clear messages.
+- Never commit secrets; `.env.example` only. Retain existing git remote configuration.
