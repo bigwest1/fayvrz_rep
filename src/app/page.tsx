@@ -1,65 +1,127 @@
-import Image from "next/image";
+import Link from "next/link";
+
+const valueProps = [
+  {
+    title: "Actionable plans",
+    detail: "Crisp tasks with ownership, timing, and clear outcomes to reduce decision fatigue.",
+  },
+  {
+    title: "Local resources",
+    detail: "Surface nearby services and benefits with context so you know why they help.",
+  },
+  {
+    title: "Autopilot help",
+    detail: "Draft messages and forms for you to review, keeping control and consent explicit.",
+  },
+];
+
+const preview = [
+  "Stabilize essentials before chasing paperwork.",
+  "Stay ahead of deadlines with simple reminders.",
+  "See why each task matters before you commit time.",
+  "Keep your information safe with server-side handling.",
+];
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <main className="flex flex-1 justify-center px-6 py-16 sm:py-20 lg:py-24">
+      <div className="w-full max-w-6xl space-y-14 lg:space-y-16">
+        <header className="grid gap-10 lg:grid-cols-[1.2fr_1fr] lg:items-start">
+          <div className="space-y-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 shadow-sm">
+              <span className="h-2 w-2 rounded-full bg-neutral-900" />
+              Calm guidance for real life moments
+            </div>
+            <h1 className="text-4xl font-semibold leading-tight tracking-tight text-neutral-900 sm:text-5xl">
+              Know your next step.
+            </h1>
+            <p className="max-w-2xl text-lg text-neutral-700">
+              Fayvrz gives you a steady plan, connects you to trusted resources, and handles the
+              routine drafting so you can focus on decisions that matter.
+            </p>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+              <Link
+                href="/example"
+                className="inline-flex items-center justify-center rounded-full border border-neutral-900 bg-neutral-900 px-5 py-3 text-base font-semibold text-neutral-50 shadow-sm transition-colors hover:bg-neutral-800"
+              >
+                See an example plan
+              </Link>
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center justify-center rounded-full border border-neutral-300 px-5 py-3 text-base font-semibold text-neutral-900 transition-colors hover:border-neutral-400 hover:bg-white"
+              >
+                Sign in
+              </Link>
+            </div>
+          </div>
+          <div className="space-y-4 rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+            <p className="text-sm font-semibold uppercase tracking-[0.08em] text-neutral-600">
+              What a plan feels like
+            </p>
+            <div className="space-y-3">
+              {preview.map((item) => (
+                <div
+                  key={item}
+                  className="flex items-start gap-3 rounded-xl border border-neutral-100 bg-neutral-50 px-4 py-3"
+                >
+                  <span className="mt-1 h-2 w-2 rounded-full bg-neutral-900" />
+                  <p className="text-sm text-neutral-800">{item}</p>
+                </div>
+              ))}
+            </div>
+            <p className="text-sm text-neutral-600">
+              No gradients or gloss. Just clear priorities, steady pacing, and room to breathe.
+            </p>
+          </div>
+        </header>
+
+        <section className="grid gap-6 md:grid-cols-3">
+          {valueProps.map((item) => (
+            <div
+              key={item.title}
+              className="flex h-full flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+              <div className="space-y-3">
+                <h2 className="text-lg font-semibold text-neutral-900">{item.title}</h2>
+                <p className="text-sm leading-relaxed text-neutral-700">{item.detail}</p>
+              </div>
+              <div className="mt-4 h-px w-full bg-neutral-200" />
+              <div className="pt-3 text-sm font-medium text-neutral-800">Built for calm focus.</div>
+            </div>
+          ))}
+        </section>
+
+        <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <p className="text-sm font-semibold uppercase tracking-[0.08em] text-neutral-600">
+                Dual-track readiness
+              </p>
+              <h3 className="text-2xl font-semibold text-neutral-900">
+                Marketing and app spaces stay in sync.
+              </h3>
+              <p className="max-w-2xl text-sm text-neutral-700">
+                Public stories live in marketing. Secure actions live in the app. The shell keeps both
+                steady so you can ship without drift.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href="/example"
+                className="inline-flex items-center justify-center rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-900 transition-colors hover:border-neutral-400 hover:bg-neutral-50"
+              >
+                Review an example
+              </Link>
+              <Link
+                href="/sign-in"
+                className="inline-flex items-center justify-center rounded-lg border border-neutral-900 bg-neutral-900 px-4 py-2 text-sm font-semibold text-neutral-50 shadow-sm transition-colors hover:bg-neutral-800"
+              >
+                Get started
+              </Link>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
   );
 }
