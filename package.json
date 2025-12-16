@@ -7,13 +7,18 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "db:generate": "prisma generate",
+    "db:push": "prisma db push",
+    "db:studio": "prisma studio",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "next type-check"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.3",
+    "@prisma/client": "^7.1.0",
     "next": "16.0.10",
+    "prisma": "^7.1.0",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
