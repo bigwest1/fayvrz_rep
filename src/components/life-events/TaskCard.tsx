@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 type TaskStatus = "upcoming" | "active" | "completed";
 
 type TaskCardProps = {
@@ -6,6 +8,8 @@ type TaskCardProps = {
   status: TaskStatus;
   actionLabel?: string;
   defaultOpen?: boolean;
+  actions?: ReactNode;
+  label?: string;
 };
 
 const statusLabel: Record<TaskStatus, string> = {
@@ -29,6 +33,8 @@ export function TaskCard({
   status,
   actionLabel = "Action placeholder",
   defaultOpen = false,
+  actions,
+  label = "Task",
 }: TaskCardProps) {
   return (
     <details
@@ -40,7 +46,7 @@ export function TaskCard({
       <summary className="flex cursor-pointer items-start justify-between gap-3">
         <div className="space-y-1">
           <p className="text-xs font-semibold uppercase tracking-[0.08em] text-[color:var(--color-text-muted)]">
-            Task
+            {label}
           </p>
           <h3 className="text-base font-semibold text-[color:var(--color-text)]">{title}</h3>
         </div>
@@ -61,17 +67,19 @@ export function TaskCard({
 
       <div className="task-card__content mt-3 space-y-3">
         <p className="type-body text-[color:var(--color-text-muted)]">{reason}</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-base)] ease-[var(--motion-ease-subtle)] hover:bg-[color:var(--color-accent-calm)]"
-          >
-            {actionLabel}
-          </button>
-          <span className="text-xs text-[color:var(--color-text-muted)]">
-            Why this matters stays visible first.
-          </span>
-        </div>
+        {actions ?? (
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-border-strong)] px-4 py-2 text-sm font-semibold text-[color:var(--color-text)] transition-colors duration-[var(--motion-base)] ease-[var(--motion-ease-subtle)] hover:bg-[color:var(--color-accent-calm)]"
+            >
+              {actionLabel}
+            </button>
+            <span className="text-xs text-[color:var(--color-text-muted)]">
+              Why this matters stays visible first.
+            </span>
+          </div>
+        )}
       </div>
     </details>
   );

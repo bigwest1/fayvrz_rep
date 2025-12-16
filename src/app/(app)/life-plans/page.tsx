@@ -1,52 +1,60 @@
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { LifeEventCard, type LifeEventStatus } from "@/components/life-events/LifeEventCard";
+import { getProfileSignals, requireUser } from "@/lib/currentUser";
+import { getRecommendedLifeEvents } from "@/lib/lifeEngine";
 
-type Plan = {
-  title: string;
-  status: LifeEventStatus;
-  context: string;
-  href: string;
-};
+export default async function LifePlansPage() {
+  await requireUser();
+  const signals = await getProfileSignals();
+  const recommended = getRecommendedLifeEvents(signals);
 
-const plans: Plan[] = [
-  {
-    title: "Job loss",
-    status: "active",
-    context: "Protect income, health coverage, and momentum while you reset.",
-    href: "/life-plans/example",
-  },
-  {
-    title: "Moving cities",
-    status: "upcoming",
-    context: "Line up housing, documents, and local services before you travel.",
-    href: "/life-plans",
-  },
-  {
-    title: "Medical recovery",
-    status: "completed",
-    context: "Capture follow-ups, paperwork, and steady routines after discharge.",
-    href: "/life-plans",
-  },
-];
-
-export default function LifePlansPage() {
   return (
     <AppShell
       activePath="/life-plans"
       title="Life Plans"
       description="Life events organized as plans with tasks, context, and the right pacing."
     >
+      <section className="card flex flex-wrap items-center justify-between gap-3 p-5">
+        <div>
+          <p className="type-meta">Signals in use</p>
+          <p className="type-body text-[color:var(--color-text-muted)]">
+            {signals.location ? `Tuned for ${signals.location}. ` : ""}
+            {signals.homeContext
+              ? `Home context: ${signals.homeContext}. `
+              : ""}
+            {signals.incomeBand ? `Income feel: ${signals.incomeBand}.` : "Update signals anytime."}
+          </p>
+        </div>
+        <Link
+          href="/account"
+          className="inline-flex items-center justify-center rounded-full border border-[color:var(--color-text)] bg-[color:var(--color-text)] px-4 py-2 text-sm font-semibold text-[color:var(--color-surface)] shadow-[var(--shadow-subtle)] transition-colors duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)] hover:opacity-90"
+        >
+          Adjust signals
+        </Link>
+      </section>
+
       <section className="grid gap-[var(--space-md)] md:grid-cols-2">
-        {plans.map((plan) => (
-          <LifeEventCard
-            key={plan.title}
-            title={plan.title}
-            status={plan.status}
-            context={plan.context}
-            primaryAction={{ label: "View plan", href: plan.href }}
-            secondaryAction={{ label: "Preview steps", href: plan.href }}
-          />
-        ))}
+        {recommended.map((plan) => {
+          const status: LifeEventStatus = plan.triggerSignals ? "active" : "upcoming";
+          return (
+            <LifeEventCard
+              key={plan.id}
+              title={plan.title}
+              status={status}
+              context={plan.whoItsFor}
+              primaryAction={{ label: "View plan", href: `/life-plans/${plan.id}` }}
+              secondaryAction={{ label: "Preview steps", href: `/life-plans/${plan.id}` }}
+            />
+          );
+        })}
+        <LifeEventCard
+          title="Example plan"
+          status="upcoming"
+          context="Preview the flow without saving anything. Good for sharing."
+          primaryAction={{ label: "View example", href: "/life-plans/example" }}
+          secondaryAction={{ label: "Preview steps", href: "/life-plans/example" }}
+        />
       </section>
     </AppShell>
   );
