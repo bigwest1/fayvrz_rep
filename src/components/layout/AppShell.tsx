@@ -47,7 +47,7 @@ export function AppShell({ children, activePath, title, description }: AppShellP
                   href={item.href}
                   aria-current={isActive ? "page" : undefined}
                   className={[
-                    "group relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap",
+                    "nav-link-motion group relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap",
                     "transition-colors duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)]",
                     isActive
                       ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)] shadow-sm"

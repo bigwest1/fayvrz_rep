@@ -34,7 +34,7 @@ export function TaskCard({
     <details
       data-status={status}
       data-animate="task"
-      className="group relative overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-subtle)] transition-colors duration-[var(--motion-base)] ease-[var(--motion-ease-subtle)] [&>summary]:list-none [&>summary::-webkit-details-marker]:hidden"
+      className="task-card group relative overflow-hidden rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 shadow-[var(--shadow-subtle)] transition-colors duration-[var(--motion-base)] ease-[var(--motion-ease-subtle)] [&>summary]:list-none [&>summary::-webkit-details-marker]:hidden"
       open={defaultOpen}
     >
       <summary className="flex cursor-pointer items-start justify-between gap-3">
@@ -59,7 +59,7 @@ export function TaskCard({
         </div>
       </summary>
 
-      <div className="mt-3 space-y-3">
+      <div className="task-card__content mt-3 space-y-3">
         <p className="type-body text-[color:var(--color-text-muted)]">{reason}</p>
         <div className="flex flex-wrap items-center gap-3">
           <button

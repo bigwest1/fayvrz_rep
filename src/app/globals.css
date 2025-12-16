@@ -127,6 +127,63 @@ a {
   background: var(--color-surface-muted);
 }
 
+.nav-link-motion {
+  transition:
+    color var(--motion-fast) var(--motion-ease-standard),
+    background-color var(--motion-fast) var(--motion-ease-standard),
+    border-color var(--motion-fast) var(--motion-ease-standard),
+    transform var(--motion-fast) var(--motion-ease-standard);
+}
+
+.nav-link-motion:hover,
+.nav-link-motion:focus-visible {
+  transform: translateY(-1px);
+}
+
+[data-animate="life-event"] {
+  animation: fade-rise var(--motion-base) var(--motion-ease-entrance) both;
+}
+
+.task-card {
+  transition:
+    border-color var(--motion-base) var(--motion-ease-subtle),
+    box-shadow var(--motion-base) var(--motion-ease-subtle),
+    background-color var(--motion-base) var(--motion-ease-subtle);
+}
+
+.task-card__content {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(-6px);
+  transition:
+    max-height var(--motion-gentle) var(--motion-ease-subtle),
+    opacity var(--motion-base) var(--motion-ease-subtle),
+    transform var(--motion-base) var(--motion-ease-subtle);
+}
+
+.task-card[open] .task-card__content {
+  max-height: 32rem;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.task-card:focus-within {
+  border-color: var(--color-border-strong);
+  box-shadow: var(--shadow-lifted);
+}
+
+@keyframes fade-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     animation-duration: 0ms !important;
