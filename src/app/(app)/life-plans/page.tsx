@@ -1,13 +1,15 @@
-import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { LifeEventCard, type LifeEventStatus } from "@/components/life-events/LifeEventCard";
-import { getProfileSignals, requireUser } from "@/lib/currentUser";
+import { getProfileSignals } from "@/lib/currentUser";
 import { getRecommendedLifeEvents } from "@/lib/lifeEngine";
+import { getAllLifeEventStates } from "@/lib/lifeState";
+import { requireDbUser } from "@/lib/auth.server";
 
 export default async function LifePlansPage() {
-  await requireUser();
+  const user = await requireDbUser();
   const signals = await getProfileSignals();
   const recommended = getRecommendedLifeEvents(signals);
+  const lifeEventStates = await getAllLifeEventStates(user.id);
 
   return (
     <AppShell
@@ -36,7 +38,11 @@ export default async function LifePlansPage() {
 
       <section className="grid gap-[var(--space-md)] md:grid-cols-2">
         {recommended.map((plan) => {
-          const status: LifeEventStatus = plan.triggerSignals ? "active" : "upcoming";
+          const state = lifeEventStates.find((item) => item.lifeEventId === plan.id);
+          let status: LifeEventStatus = "upcoming";
+          if (state?.status === "ACTIVE") status = "active";
+          if (state?.status === "COMPLETED") status = "completed";
+
           return (
             <LifeEventCard
               key={plan.id}

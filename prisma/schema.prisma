@@ -66,6 +66,7 @@ model LifeEventState {
   updatedAt   DateTime         @updatedAt
 
   @@index([userId, lifeEventId])
+  @@unique([userId, lifeEventId])
 }
 
 model TaskState {
@@ -80,6 +81,7 @@ model TaskState {
   createdAt   DateTime    @default(now())
 
   @@index([userId, lifeEventId, taskId])
+  @@unique([userId, lifeEventId, taskId])
 }
 
 model AuditLog {
