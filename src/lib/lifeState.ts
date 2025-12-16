@@ -1,5 +1,6 @@
 import { LifeEventStatus, TaskStatus } from "@prisma/client";
 import { prisma } from "./prisma";
+import { recordAudit } from "./audit";
 
 export async function getPlanState(userId: string, lifeEventId: string) {
   const [lifeEventState, taskStates] = await Promise.all([
@@ -31,7 +32,7 @@ export async function setLifeEventStatus(
   const completedAt =
     status === LifeEventStatus.COMPLETED ? now : status === LifeEventStatus.ACTIVE ? null : existing?.completedAt ?? null;
 
-  return prisma.lifeEventState.upsert({
+  const state = await prisma.lifeEventState.upsert({
     where: { userId_lifeEventId: { userId, lifeEventId } },
     create: {
       userId,
@@ -46,6 +47,14 @@ export async function setLifeEventStatus(
       completedAt: completedAt ?? undefined,
     },
   });
+
+  await recordAudit(
+    "life_event_status_changed",
+    { lifeEventId, status, startedAt: state.startedAt, completedAt: state.completedAt },
+    userId,
+  );
+
+  return state;
 }
 
 export async function setTaskStatus(
@@ -56,7 +65,7 @@ export async function setTaskStatus(
   notes?: string | null,
 ) {
   const now = new Date();
-  return prisma.taskState.upsert({
+  const state = await prisma.taskState.upsert({
     where: { userId_lifeEventId_taskId: { userId, lifeEventId, taskId } },
     create: {
       userId,
@@ -71,6 +80,14 @@ export async function setTaskStatus(
       updatedAt: now,
     },
   });
+
+  await recordAudit(
+    "task_status_changed",
+    { lifeEventId, taskId, status, notes: notes || null },
+    userId,
+  );
+
+  return state;
 }
 
 export async function getAllLifeEventStates(userId: string) {

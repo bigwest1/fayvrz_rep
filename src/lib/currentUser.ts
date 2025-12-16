@@ -5,6 +5,7 @@ import {
   type ProfileSignals,
 } from "./profileSignals";
 import { getDbUser, requireDbUser } from "./auth.server";
+import { recordAudit } from "./audit";
 
 export async function getCurrentUser() {
   return getDbUser();
@@ -61,6 +62,18 @@ export async function updateProfileSignals(signals: ProfileSignals) {
       preferences: cleaned.preferences ?? {},
     },
   });
+
+  await recordAudit(
+    "profile_signals_updated",
+    {
+      displayName: cleaned.displayName,
+      ageBand: cleaned.ageBand,
+      homeContext: cleaned.homeContext,
+      location: cleaned.location,
+      incomeBand: cleaned.incomeBand,
+    },
+    user.id,
+  );
 
   return cleaned;
 }
