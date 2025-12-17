@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPlan, type PlanId } from "@/lib/billing/plans";
 import { getStripe, isStripeConfigured, StripeNotConfigured } from "@/lib/billing/stripe";
-import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/currentUser";
 
 export async function POST(req: Request) {

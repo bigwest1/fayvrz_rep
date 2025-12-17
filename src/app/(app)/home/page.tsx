@@ -10,7 +10,6 @@ import { FocusCard, IntentBar, Reveal } from "@/components/ux";
 
 export default async function HomePage() {
   const user = await requireUser();
-  const signals = await getProfileSignals();
 
   async function logLifeContext(formData: FormData) {
     "use server";

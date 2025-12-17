@@ -2,7 +2,9 @@ import type { ProviderResponse, ResourceProvider, ResourceContext } from "./type
 
 export const mapboxProvider: ResourceProvider = {
   name: "mapbox",
-  async search(_query: string, _context: ResourceContext): Promise<ProviderResponse> {
+  async search(query: string, context: ResourceContext): Promise<ProviderResponse> {
+    void query;
+    void context;
     const token = process.env.MAPBOX_TOKEN;
     if (!token) {
       return { ok: false, error: "Mapbox not configured", reason: "ProviderNotConfigured" };

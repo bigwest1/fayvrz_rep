@@ -95,22 +95,20 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "Missing signature" }, { status: 400 });
   }
 
-  let event;
+  let event: Stripe.Event;
   try {
     event = stripe.webhooks.constructEvent(rawBody, signature, process.env.STRIPE_WEBHOOK_SECRET);
-  } catch (err: any) {
-    return NextResponse.json({ ok: false, error: `Invalid signature: ${err.message}` }, { status: 400 });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : "Invalid signature";
+    return NextResponse.json({ ok: false, error: `Invalid signature: ${message}` }, { status: 400 });
   }
 
-  const data = event.data.object as any;
-
   if (event.type === "checkout.session.completed") {
-    const session = data;
+    const session = event.data.object as Stripe.Checkout.Session;
     const clerkUserId = session.client_reference_id ?? session.metadata?.clerkUserId ?? null;
     const planId =
       session.metadata?.planId ??
       getPlanByPriceId(session?.metadata?.priceId)?.id ??
-      getPlanByPriceId(session?.subscription_details?.metadata?.priceId)?.id ??
       "FREE";
 
     if (!session.subscription) {
@@ -118,19 +116,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const subscription = (await stripe.subscriptions.retrieve(session.subscription as string)) as any;
+    const subscription = (await stripe.subscriptions.retrieve(
+      session.subscription as string,
+    )) as Stripe.Subscription;
+    const sub = subscription as Stripe.Subscription;
     const subPlan =
-      planId ?? getPlanByPriceId(subscription.items?.data?.[0]?.price?.id)?.id ?? "FREE";
-    const status = normalizeStatus(subscription.status) as SubscriptionStatus;
+      planId ?? getPlanByPriceId(sub.items?.data?.[0]?.price?.id)?.id ?? "FREE";
+    const status = normalizeStatus(sub.status) as SubscriptionStatus;
 
     await upsertSubscription({
       clerkUserId,
       planId: subPlan,
       status,
-      currentPeriodEnd: subscription.current_period_end,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      stripeCustomerId: subscription.customer as string,
-      stripeSubscriptionId: subscription.id,
+      currentPeriodEnd: (sub as unknown as Record<string, unknown>)["current_period_end"] as number | null,
+      cancelAtPeriodEnd: (sub as unknown as Record<string, unknown>)["cancel_at_period_end"] as boolean | undefined,
+      stripeCustomerId: sub.customer as string,
+      stripeSubscriptionId: sub.id,
     });
 
     await recordAudit("BILLING_SUBSCRIPTION_CREATED", {
@@ -141,18 +142,19 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "customer.subscription.updated") {
-    const subscription = data;
-    const planId = getPlanByPriceId(subscription.items?.data?.[0]?.price?.id)?.id ?? "FREE";
-    const status = normalizeStatus(subscription.status) as SubscriptionStatus;
+    const subscription = event.data.object as Stripe.Subscription;
+    const sub = subscription as Stripe.Subscription;
+    const planId = getPlanByPriceId(sub.items?.data?.[0]?.price?.id)?.id ?? "FREE";
+    const status = normalizeStatus(sub.status) as SubscriptionStatus;
 
     await upsertSubscription({
-      clerkUserId: subscription.metadata?.clerkUserId ?? null,
+      clerkUserId: sub.metadata?.clerkUserId ?? null,
       planId,
       status,
-      currentPeriodEnd: subscription.current_period_end,
-      cancelAtPeriodEnd: subscription.cancel_at_period_end,
-      stripeCustomerId: subscription.customer as string,
-      stripeSubscriptionId: subscription.id,
+      currentPeriodEnd: (sub as unknown as Record<string, unknown>)["current_period_end"] as number | null,
+      cancelAtPeriodEnd: (sub as unknown as Record<string, unknown>)["cancel_at_period_end"] as boolean | undefined,
+      stripeCustomerId: sub.customer as string,
+      stripeSubscriptionId: sub.id,
     });
 
     await recordAudit("BILLING_SUBSCRIPTION_UPDATED", {
@@ -163,7 +165,7 @@ export async function POST(req: Request) {
   }
 
   if (event.type === "customer.subscription.deleted") {
-    const subscription = data;
+    const subscription = event.data.object as Stripe.Subscription;
     await prisma.subscription.updateMany({
       where: { stripeSubscriptionId: subscription.id },
       data: { status: "CANCELED" },

@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import type { ReactNode } from "react";
-import { CommandBar } from "@/components/patterns/CommandBar";
 import { getCurrentUser } from "@/lib/currentUser";
 import { getUserTasksByStatus } from "@/lib/events";
 import { getUserPlan } from "@/lib/billing/entitlements";
@@ -27,36 +26,6 @@ type AppShellProps = {
 };
 
 export function AppShell({ children, activePath, title, description }: AppShellProps) {
-  const Today = async () => {
-    const user = await getCurrentUser();
-    if (!user) return null;
-    const tasks = await getUserTasksByStatus(user.id, UserTaskStatus.TODO);
-    const next = tasks[0];
-    if (!next) return null;
-    return (
-      <Link
-        href={`/events/${next.userEvent.lifeEvent.slug}`}
-        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-xs font-semibold text-[color:var(--color-text)] hover:border-[color:var(--color-border-strong)]"
-      >
-        <span className="rounded-full bg-[color:var(--color-text)] px-2 py-1 text-[color:var(--color-surface)]">
-          Today
-        </span>
-        <span className="truncate">{next.title}</span>
-      </Link>
-    );
-  };
-
-  const PlanBadge = async () => {
-    const user = await getCurrentUser();
-    if (!user) return null;
-    const plan = await getUserPlan(user.id);
-    return (
-      <span className="rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)]">
-        {plan}
-      </span>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-[color:var(--color-canvas)] text-[color:var(--color-text)]">
       <header className="sticky top-0 z-30 border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)] backdrop-blur-sm">
@@ -75,7 +44,7 @@ export function AppShell({ children, activePath, title, description }: AppShellP
           </div>
           <div className="flex items-center gap-3">
             <Suspense fallback={null}>
-              <Today />
+              <TodayBadge />
             </Suspense>
             <Suspense fallback={null}>
               <PlanBadge />
@@ -138,5 +107,35 @@ export function AppShell({ children, activePath, title, description }: AppShellP
         <div className="flex flex-col gap-[var(--space-md)] pb-10">{children}</div>
       </main>
     </div>
+  );
+}
+
+async function TodayBadge() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const tasks = await getUserTasksByStatus(user.id, UserTaskStatus.TODO);
+  const next = tasks[0];
+  if (!next) return null;
+  return (
+    <Link
+      href={`/events/${next.userEvent.lifeEvent.slug}`}
+      className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-xs font-semibold text-[color:var(--color-text)] hover:border-[color:var(--color-border-strong)]"
+    >
+      <span className="rounded-full bg-[color:var(--color-text)] px-2 py-1 text-[color:var(--color-surface)]">
+        Today
+      </span>
+      <span className="truncate">{next.title}</span>
+    </Link>
+  );
+}
+
+async function PlanBadge() {
+  const user = await getCurrentUser();
+  if (!user) return null;
+  const plan = await getUserPlan(user.id);
+  return (
+    <span className="rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)]">
+      {plan}
+    </span>
   );
 }

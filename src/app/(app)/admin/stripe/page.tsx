@@ -1,5 +1,4 @@
 import { redirect } from "next/navigation";
-import { NextResponse } from "next/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { requireUser } from "@/lib/currentUser";
 import { isStripeConfigured } from "@/lib/billing/stripe";
@@ -9,11 +8,7 @@ import { getPlanByPriceId } from "@/lib/billing/plans";
 
 export const runtime = "nodejs";
 
-type Props = {
-  searchParams?: { dry?: string };
-};
-
-export default async function AdminStripePage({ searchParams }: Props) {
+export default async function AdminStripePage() {
   const admin = await requireUser();
   if (admin.role !== "OWNER") {
     redirect("/admin");
@@ -38,7 +33,7 @@ export default async function AdminStripePage({ searchParams }: Props) {
     if (actor.role !== "OWNER") return;
     const payload = formData.get("payload")?.toString();
     if (!payload) return;
-    let parsed: any;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(payload);
     } catch {
@@ -46,21 +41,30 @@ export default async function AdminStripePage({ searchParams }: Props) {
       return;
     }
 
-    const type = parsed.type ?? "unknown";
-    const data = parsed.data?.object ?? {};
-    let planId =
-      data?.metadata?.planId ??
-      getPlanByPriceId(data?.items?.data?.[0]?.price?.id)?.id ??
+    const record = parsed as { type?: string; data?: { object?: Record<string, unknown> } };
+    const type = record.type ?? "unknown";
+    const data = (record.data?.object as Record<string, unknown> | undefined) ?? {};
+    const metadata = data.metadata as Record<string, unknown> | undefined;
+    const itemPriceId =
+      (data as { items?: { data?: { price?: { id?: string } }[] } }).items?.data?.[0]?.price?.id ??
+      undefined;
+    const planId =
+      (metadata?.planId as string | undefined) ??
+      getPlanByPriceId(itemPriceId)?.id ??
       "FREE";
 
-    const would = {
-      type,
-      planId,
-      status: data?.status ?? "n/a",
-      stripeSubscriptionId: data?.id ?? data?.subscription,
-    };
+    const status = typeof (data as { status?: unknown }).status === "string" ? (data as { status?: string }).status : "n/a";
+    const stripeSubscriptionId =
+      typeof (data as { subscription?: unknown }).subscription === "string"
+        ? (data as { subscription: string }).subscription
+        : typeof (data as { id?: unknown }).id === "string"
+          ? (data as { id: string }).id
+          : "n/a";
 
-    await recordAudit("ADMIN_STRIPE_DRY_RUN", { type, planId }, actor.id, { type: "Stripe", id: would.stripeSubscriptionId ?? "n/a" });
+    await recordAudit("ADMIN_STRIPE_DRY_RUN", { type, planId, status }, actor.id, {
+      type: "Stripe",
+      id: stripeSubscriptionId,
+    });
     // For now we only log; surface result via audit log.
   }
 

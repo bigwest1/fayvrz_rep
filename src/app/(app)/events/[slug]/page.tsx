@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { UserTaskStatus, JobType } from "@prisma/client";
 import { AppShell } from "@/components/layout/AppShell";
 import { ResourceList } from "@/components/resources/ResourceList";

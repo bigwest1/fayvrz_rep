@@ -1,13 +1,16 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
+import { auth, clerkClient, type User } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import {
   defaultProfileSignals,
   sanitizeProfileSignals,
   type ProfileSignals,
+  type AgeBand,
+  type HomeContext,
+  type IncomeBand,
 } from "./profileSignals";
 import { recordAudit } from "./audit";
 
-function resolveDisplayName(user: any) {
+function resolveDisplayName(user: Partial<User>) {
   return (
     user.fullName ||
     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -17,11 +20,11 @@ function resolveDisplayName(user: any) {
   );
 }
 
-function resolveEmail(user: any) {
+function resolveEmail(user: Partial<User>) {
   return user.primaryEmailAddress?.emailAddress || "unknown@example.com";
 }
 
-function resolveImageUrl(user: any) {
+function resolveImageUrl(user: Partial<User>) {
   return user.imageUrl || undefined;
 }
 
@@ -120,9 +123,12 @@ export async function getProfileSignals(): Promise<ProfileSignals> {
     defaultProfileSignals.displayName;
 
   return sanitizeProfileSignals({
-    ...defaultProfileSignals,
-    ...(profile as any),
     displayName: fallbackName,
+    ageBand: (profile?.ageBand as AgeBand | undefined) ?? defaultProfileSignals.ageBand,
+    homeContext: (profile?.homeContext as HomeContext | undefined) ?? defaultProfileSignals.homeContext,
+    location: profile?.location ?? defaultProfileSignals.location,
+    incomeBand: (profile?.incomeBand as IncomeBand | undefined) ?? defaultProfileSignals.incomeBand,
+    preferences: (profile?.preferences as Record<string, unknown> | null) ?? defaultProfileSignals.preferences,
   });
 }
 

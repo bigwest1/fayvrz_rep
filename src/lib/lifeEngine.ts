@@ -48,6 +48,7 @@ export function getLifeEventById(id: string): LifeEvent | undefined {
 }
 
 export function getPlanForLifeEvent(id: string, signals: ProfileSignals): LifeEventPlan | null {
+  void signals;
   const event = getLifeEventById(id);
 
   if (!event) {

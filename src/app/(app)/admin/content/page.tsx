@@ -20,7 +20,7 @@ export default async function AdminContentPage() {
     const featureFlag = formData.get("featureFlag")?.toString().trim() || null;
     const published = formData.get("published") === "on";
     if (!raw) return;
-    let json: any;
+    let json: unknown;
     try {
       json = JSON.parse(raw);
     } catch {

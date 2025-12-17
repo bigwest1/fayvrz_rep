@@ -1,4 +1,4 @@
-import { addMonths, startOfMonth } from "date-fns";
+import { addMonths } from "date-fns";
 import { JobType } from "@prisma/client";
 import { prisma } from "../prisma";
 import { getPlan, getPlanByPriceId, type PlanId } from "./plans";

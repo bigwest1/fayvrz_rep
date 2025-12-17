@@ -1,4 +1,5 @@
 import type { ResourceProvider, ResourceContext, ProviderResponse } from "./types";
+import type { ResourceResult } from "./types";
 
 const genericResources = [
   {
@@ -45,12 +46,20 @@ const stateResources: Record<
 export const staticGovProvider: ResourceProvider = {
   name: "static-gov",
   async search(_query: string, context: ResourceContext): Promise<ProviderResponse> {
-    const results: any[] = [...genericResources];
+    const results: ResourceResult[] = genericResources.map((item) => ({
+      ...item,
+      source: "static-gov",
+    }));
     const stateCode = context.location?.state?.toUpperCase();
     if (stateCode && stateResources[stateCode]) {
-      results.push(...stateResources[stateCode]);
+      results.push(
+        ...stateResources[stateCode].map((item) => ({
+          ...item,
+          source: "static-gov",
+        })),
+      );
     }
 
-    return { ok: true, results: results.map((item) => ({ ...item, source: "static-gov" })) };
+    return { ok: true, results };
   },
 };

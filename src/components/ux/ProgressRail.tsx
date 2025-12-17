@@ -12,7 +12,7 @@ type Props = {
 export function ProgressRail({ steps }: Props) {
   return (
     <div className="flex flex-col gap-3">
-      {steps.map((step, idx) => (
+      {steps.map((step) => (
         <button
           key={step.id}
           onClick={step.onClick}

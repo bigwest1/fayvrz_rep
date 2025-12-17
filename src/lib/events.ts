@@ -1,7 +1,6 @@
-import { Prisma, UserTaskStatus } from "@prisma/client";
+import { UserTaskStatus } from "@prisma/client";
 import { prisma } from "./prisma";
 import { getEntitlements } from "./billing/entitlements";
-import { enforceEntitlementOrUpsell } from "./billing/enforce";
 
 export async function getLifeEventBySlug(slug: string) {
   return prisma.lifeEvent.findUnique({

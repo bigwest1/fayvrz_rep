@@ -13,7 +13,10 @@ export function FocusCard({ children, status, onClick, className }: Props) {
     <motion.article
       onClick={onClick}
       whileHover={{ y: -2, boxShadow: "var(--shadow-subtle)" }}
-      transition={{ duration: motionTokens.durations.fast, ease: motionTokens.easings.subtle as any }}
+      transition={{
+        duration: motionTokens.durations.fast,
+        ease: motionTokens.easings.subtle as [number, number, number, number],
+      }}
       className={[
         "relative space-y-2 rounded-[var(--radius-lg)] border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-4 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--color-border-strong)]",
         className,

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import type { Plan } from "@/lib/billing/plans";
 
 type BillingCardProps = {

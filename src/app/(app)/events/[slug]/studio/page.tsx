@@ -7,7 +7,7 @@ import { FocusCard } from "@/components/ux";
 type Props = { params: { slug: string } };
 
 export default async function EventStudioPage({ params }: Props) {
-  const user = await requireUser();
+  await requireUser();
   const event = await prisma.lifeEvent.findUnique({
     where: { slug: params.slug },
     include: { tasks: { include: { scripts: true, resources: true } } },

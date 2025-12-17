@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { PLANS } from "@/lib/billing/plans";
 import { requireUser } from "@/lib/currentUser";
 import { getEntitlements, getUserPlan } from "@/lib/billing/entitlements";

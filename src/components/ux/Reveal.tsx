@@ -5,7 +5,13 @@ import { motionTokens } from "@/lib/ux/motion";
 
 type Variant = "fadeUp" | "fade" | "scaleIn" | "slideRight";
 
-const variants: Record<Variant, any> = {
+const variants: Record<
+  Variant,
+  {
+    hidden: Record<string, number>;
+    visible: Record<string, number>;
+  }
+> = {
   fadeUp: {
     hidden: { opacity: 0, y: 16 },
     visible: { opacity: 1, y: 0 },
@@ -41,7 +47,7 @@ export function Reveal({ children, variant = "fadeUp", delay = 0 }: Props) {
       variants={variants[variant]}
       transition={{
         duration: motionTokens.durations.base,
-        ease: motionTokens.easings.entrance as any,
+        ease: motionTokens.easings.entrance as [number, number, number, number],
         delay,
       }}
     >

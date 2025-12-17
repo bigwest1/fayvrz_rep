@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { JobStatus, JobType } from "@prisma/client";
+import { JobStatus, JobType, type Prisma } from "@prisma/client";
 import { runResourceSearch } from "@/lib/resources/engine";
 import { claimNextJobs, completeJob, failJob } from "@/lib/jobs/queue";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +20,7 @@ function checkRateLimit(key: string) {
   return false;
 }
 
-async function processJob(job: { id: string; userId: string | null; type: JobType; payloadJson: any }) {
+async function processJob(job: { id: string; userId: string | null; type: JobType; payloadJson: Prisma.JsonValue }) {
   switch (job.type) {
     case JobType.GENERATE_RESOURCES_FOR_TASK: {
       const payload = job.payloadJson as {
@@ -79,12 +79,13 @@ export async function POST(req: Request) {
   const results = [];
   for (const job of jobs) {
     try {
-      await processJob(job as any);
+      await processJob(job);
       await completeJob(job.id);
       results.push({ id: job.id, status: JobStatus.DONE });
-    } catch (error: any) {
-      await failJob(job.id, error?.message ?? "unknown error");
-      results.push({ id: job.id, status: JobStatus.FAILED, error: error?.message });
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "unknown error";
+      await failJob(job.id, message);
+      results.push({ id: job.id, status: JobStatus.FAILED, error: message });
     }
   }
 
