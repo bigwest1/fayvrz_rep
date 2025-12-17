@@ -3,11 +3,10 @@ import { revalidatePath } from "next/cache";
 import { notFound } from "next/navigation";
 import { AppShell } from "@/components/layout/AppShell";
 import { TaskCard } from "@/components/life-events/TaskCard";
-import { getProfileSignals } from "@/lib/currentUser";
+import { getProfileSignals, requireUser } from "@/lib/currentUser";
 import { getPlanForLifeEvent } from "@/lib/lifeEngine";
 import type { LifeEventTaskActionType } from "@/lib/lifeEventSchema";
 import { getPlanState, setLifeEventStatus, setTaskStatus } from "@/lib/lifeState";
-import { requireDbUser } from "@/lib/auth.server";
 
 type PlanPageProps = {
   params: { id: string };
@@ -16,7 +15,7 @@ type PlanPageProps = {
 const draftableActions: LifeEventTaskActionType[] = ["draft_email", "draft_script"];
 
 export default async function LifePlanDetailPage({ params }: PlanPageProps) {
-  const user = await requireDbUser();
+  const user = await requireUser();
   const signals = await getProfileSignals();
   const plan = getPlanForLifeEvent(params.id, signals);
 
@@ -29,14 +28,14 @@ export default async function LifePlanDetailPage({ params }: PlanPageProps) {
 
   const markActive = async () => {
     "use server";
-    const currentUser = await requireDbUser();
+    const currentUser = await requireUser();
     await setLifeEventStatus(currentUser.id, plan.id, LifeEventStatus.ACTIVE);
     revalidatePath(`/life-plans/${plan.id}`);
   };
 
   const markCompleted = async () => {
     "use server";
-    const currentUser = await requireDbUser();
+    const currentUser = await requireUser();
     await setLifeEventStatus(currentUser.id, plan.id, LifeEventStatus.COMPLETED);
     revalidatePath(`/life-plans/${plan.id}`);
   };
@@ -44,7 +43,7 @@ export default async function LifePlanDetailPage({ params }: PlanPageProps) {
   const markTaskDone = async (formData: FormData) => {
     "use server";
     const taskId = String(formData.get("taskId"));
-    const currentUser = await requireDbUser();
+    const currentUser = await requireUser();
     await setLifeEventStatus(currentUser.id, plan.id, LifeEventStatus.ACTIVE);
     await setTaskStatus(currentUser.id, plan.id, taskId, TaskStatus.DONE);
     revalidatePath(`/life-plans/${plan.id}`);

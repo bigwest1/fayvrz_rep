@@ -1,5 +1,11 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import type { ReactNode } from "react";
+import { CommandBar } from "@/components/patterns/CommandBar";
+import { getCurrentUser } from "@/lib/currentUser";
+import { getUserTasksByStatus } from "@/lib/events";
+import { getUserPlan } from "@/lib/billing/entitlements";
+import { UserTaskStatus } from "@prisma/client";
 
 type NavItem = {
   label: string;
@@ -21,6 +27,36 @@ type AppShellProps = {
 };
 
 export function AppShell({ children, activePath, title, description }: AppShellProps) {
+  const Today = async () => {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    const tasks = await getUserTasksByStatus(user.id, UserTaskStatus.TODO);
+    const next = tasks[0];
+    if (!next) return null;
+    return (
+      <Link
+        href={`/events/${next.userEvent.lifeEvent.slug}`}
+        className="flex items-center gap-2 rounded-[var(--radius-md)] border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-2 text-xs font-semibold text-[color:var(--color-text)] hover:border-[color:var(--color-border-strong)]"
+      >
+        <span className="rounded-full bg-[color:var(--color-text)] px-2 py-1 text-[color:var(--color-surface)]">
+          Today
+        </span>
+        <span className="truncate">{next.title}</span>
+      </Link>
+    );
+  };
+
+  const PlanBadge = async () => {
+    const user = await getCurrentUser();
+    if (!user) return null;
+    const plan = await getUserPlan(user.id);
+    return (
+      <span className="rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-3 py-1 text-xs font-semibold text-[color:var(--color-text)]">
+        {plan}
+      </span>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-[color:var(--color-canvas)] text-[color:var(--color-text)]">
       <header className="sticky top-0 z-30 border-b border-[color:var(--color-border)] bg-[color:var(--color-surface)] backdrop-blur-sm">
@@ -37,38 +73,53 @@ export function AppShell({ children, activePath, title, description }: AppShellP
               Plans that stay calm even when life does not
             </p>
           </div>
-          <nav className="flex items-center gap-1 overflow-x-auto rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-1 py-1">
-            {navItems.map((item) => {
-              const isActive =
-                activePath === item.href || activePath?.startsWith(`${item.href}/`);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={isActive ? "page" : undefined}
-                  className={[
-                    "nav-link-motion group relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap",
-                    "transition-colors duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)]",
-                    isActive
-                      ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)] shadow-sm"
-                      : "border border-transparent text-[color:var(--color-text-muted)] hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-surface)]",
-                  ].join(" ")}
-                >
-                  {item.label}
-                  <span
+          <div className="flex items-center gap-3">
+            <Suspense fallback={null}>
+              <Today />
+            </Suspense>
+            <Suspense fallback={null}>
+              <PlanBadge />
+            </Suspense>
+            <nav className="flex items-center gap-1 overflow-x-auto rounded-full border border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-1 py-1">
+              {navItems.map((item) => {
+                const isActive =
+                  activePath === item.href || activePath?.startsWith(`${item.href}/`);
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    aria-current={isActive ? "page" : undefined}
                     className={[
-                      "pointer-events-none absolute inset-x-3 bottom-1 h-[2px] rounded-full",
-                      "transition-all duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)]",
+                      "nav-link-motion group relative inline-flex items-center gap-2 rounded-full px-3 py-2 text-sm font-semibold whitespace-nowrap",
+                      "transition-colors duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)]",
                       isActive
-                        ? "bg-[color:var(--color-text)] opacity-80"
-                        : "bg-[color:var(--color-border-strong)] opacity-0 group-hover:opacity-40",
+                        ? "border border-[color:var(--color-border-strong)] bg-[color:var(--color-surface)] text-[color:var(--color-text)] shadow-sm"
+                        : "border border-transparent text-[color:var(--color-text-muted)] hover:border-[color:var(--color-border-strong)] hover:bg-[color:var(--color-surface)]",
                     ].join(" ")}
-                    aria-hidden
-                  />
-                </Link>
-              );
-            })}
-          </nav>
+                  >
+                    {item.label}
+                    <span
+                      className={[
+                        "pointer-events-none absolute inset-x-3 bottom-1 h-[2px] rounded-full",
+                        "transition-all duration-[var(--motion-fast)] ease-[var(--motion-ease-standard)]",
+                        isActive
+                          ? "bg-[color:var(--color-text)] opacity-80"
+                          : "bg-[color:var(--color-border-strong)] opacity-0 group-hover:opacity-40",
+                      ].join(" ")}
+                      aria-hidden
+                    />
+                  </Link>
+                );
+              })}
+            </nav>
+            <CommandBar
+              commands={[
+                { label: "Go home", action: () => (window.location.href = "/home") },
+                { label: "Open start", action: () => (window.location.href = "/start") },
+                { label: "Generate resources", action: () => (window.location.href = "/home") },
+              ]}
+            />
+          </div>
         </div>
       </header>
 

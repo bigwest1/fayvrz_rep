@@ -1,12 +1,19 @@
 import { prisma } from "./prisma";
 
-export async function recordAudit(eventType: string, detail: Record<string, unknown>, userId?: string) {
+export async function recordAudit(
+  action: string,
+  detail: Record<string, unknown> = {},
+  actorUserId?: string | null,
+  target?: { type?: string; id?: string | null },
+) {
   try {
     await prisma.auditLog.create({
       data: {
-        eventType,
-        detailJson: detail,
-        userId: userId ?? null,
+        action,
+        actorUserId: actorUserId ?? "system",
+        targetType: target?.type ?? "system",
+        targetId: target?.id ?? null,
+        metadataJson: detail,
       },
     });
   } catch (error) {
@@ -20,8 +27,5 @@ export async function getRecentAuditLogs(limit = 10) {
   return prisma.auditLog.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
-    include: {
-      user: true,
-    },
   });
 }

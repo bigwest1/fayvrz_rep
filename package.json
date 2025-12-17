@@ -2,6 +2,9 @@
   "name": "fayvrz",
   "version": "0.1.0",
   "private": true,
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -10,15 +13,17 @@
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
+    "seed": "prisma db seed",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "next type-check"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.3",
-    "@prisma/client": "^7.1.0",
+    "@prisma/client": "^5.21.1",
+    "framer-motion": "^12.23.26",
     "next": "16.0.10",
-    "prisma": "^7.1.0",
+    "prisma": "^5.21.1",
     "react": "19.2.1",
     "react-dom": "19.2.1"
   },
@@ -31,6 +36,7 @@
     "eslint-config-next": "16.0.10",
     "prettier": "^3.3.3",
     "tailwindcss": "^4",
+    "tsx": "^4.19.1",
     "typescript": "^5"
   }
 }

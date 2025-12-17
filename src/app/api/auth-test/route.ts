@@ -1,9 +1,8 @@
-import { getClerkAuth } from "@/lib/auth.server";
-import { getDbUser } from "@/lib/auth.server";
+import { getClerkAuth, getCurrentUser } from "@/lib/currentUser";
 
 export async function GET() {
   const { userId: clerkUserId } = getClerkAuth();
-  const dbUser = await getDbUser();
+  const dbUser = await getCurrentUser();
 
   return Response.json({
     authenticated: Boolean(clerkUserId),

@@ -1,12 +1,12 @@
+import Link from "next/link";
 import { AppShell } from "@/components/layout/AppShell";
 import { LifeEventCard, type LifeEventStatus } from "@/components/life-events/LifeEventCard";
-import { getProfileSignals } from "@/lib/currentUser";
+import { getProfileSignals, requireUser } from "@/lib/currentUser";
 import { getRecommendedLifeEvents } from "@/lib/lifeEngine";
 import { getAllLifeEventStates } from "@/lib/lifeState";
-import { requireDbUser } from "@/lib/auth.server";
 
 export default async function LifePlansPage() {
-  const user = await requireDbUser();
+  const user = await requireUser();
   const signals = await getProfileSignals();
   const recommended = getRecommendedLifeEvents(signals);
   const lifeEventStates = await getAllLifeEventStates(user.id);

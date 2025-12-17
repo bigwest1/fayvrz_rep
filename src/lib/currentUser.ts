@@ -1,22 +1,110 @@
+import { auth, clerkClient } from "@clerk/nextjs/server";
 import { prisma } from "./prisma";
 import {
   defaultProfileSignals,
   sanitizeProfileSignals,
   type ProfileSignals,
 } from "./profileSignals";
-import { getDbUser, requireDbUser } from "./auth.server";
 import { recordAudit } from "./audit";
 
+function resolveDisplayName(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+  return (
+    user.fullName ||
+    [user.firstName, user.lastName].filter(Boolean).join(" ") ||
+    user.username ||
+    user.primaryEmailAddress?.emailAddress ||
+    "Member"
+  );
+}
+
+function resolveEmail(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+  return user.primaryEmailAddress?.emailAddress || "unknown@example.com";
+}
+
+function resolveImageUrl(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+  return user.imageUrl || undefined;
+}
+
+function resolveRole(
+  userId: string,
+  currentRole: "USER" | "ADMIN" | "OWNER",
+  email?: string | null,
+) {
+  const devAdmin = process.env.DEV_ADMIN_CLERK_USER_ID;
+  const ownerClerk = process.env.OWNER_CLERK_USER_ID;
+  const ownerEmail = process.env.OWNER_EMAIL;
+  if (ownerClerk && ownerClerk === userId) {
+    return "OWNER" as const;
+  }
+  if (ownerEmail && email && ownerEmail.toLowerCase() === email.toLowerCase()) {
+    return "OWNER" as const;
+  }
+  if (process.env.NODE_ENV !== "production" && devAdmin && devAdmin === userId) {
+    return "ADMIN" as const;
+  }
+  return currentRole;
+}
+
+export function getClerkAuth() {
+  const { userId } = auth();
+  return { userId };
+}
+
+async function getOrCreateUser() {
+  const { userId } = getClerkAuth();
+  if (!userId) return null;
+
+  const existing = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  const clerkUser = await clerkClient.users.getUser(userId);
+  const nextRole = resolveRole(userId, existing?.role ?? "USER", resolveEmail(clerkUser));
+
+  const user = await prisma.user.upsert({
+    where: { clerkUserId: userId },
+    create: {
+      clerkUserId: userId,
+      email: resolveEmail(clerkUser),
+      displayName: resolveDisplayName(clerkUser),
+      imageUrl: resolveImageUrl(clerkUser),
+      role: nextRole,
+    },
+    update: {
+      email: resolveEmail(clerkUser),
+      displayName: resolveDisplayName(clerkUser),
+      imageUrl: resolveImageUrl(clerkUser),
+      role: nextRole,
+    },
+  });
+
+  return user;
+}
+
 export async function getCurrentUser() {
-  return getDbUser();
+  const { userId } = getClerkAuth();
+  if (!userId) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { clerkUserId: userId },
+  });
+
+  return user ?? (await getOrCreateUser());
 }
 
 export async function requireUser() {
-  return requireDbUser();
+  const user = await getOrCreateUser();
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+  if (user.isBanned || user.bannedAt) {
+    throw new Error("Unauthorized");
+  }
+  return user;
 }
 
 export async function getProfileSignals(): Promise<ProfileSignals> {
-  const user = await getDbUser();
+  const user = await getCurrentUser();
   if (!user) {
     return defaultProfileSignals;
   }
@@ -39,7 +127,7 @@ export async function getProfileSignals(): Promise<ProfileSignals> {
 
 export async function updateProfileSignals(signals: ProfileSignals) {
   "use server";
-  const user = await requireDbUser();
+  const user = await requireUser();
   const cleaned = sanitizeProfileSignals(signals);
 
   await prisma.profileSignals.upsert({

@@ -1,0 +1,8 @@
+- No gradients; backgrounds use canvas/surface colors only.
+- Check focus states with keyboard: nav, buttons, command bar, drawer.
+- Verify prefers-reduced-motion: animations disable gracefully.
+- Confirm /start, /home, /events/[slug] have no hydration warnings.
+- Confirm resource lists show “verify details” note.
+- Mobile: nav remains usable, drawer accessible.
+- Copy actions: ensure clipboard works and no blocking spinners.
+- Command bar: keyboard-first (Esc closes, arrows navigate).
