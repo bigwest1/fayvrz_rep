@@ -11,6 +11,18 @@ datasource db {
 enum UserRole {
   USER
   ADMIN
+  OWNER
+}
+
+enum BillingProvider {
+  STRIPE
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
 }
 
 enum LifeEventStatus {
@@ -25,6 +37,62 @@ enum TaskStatus {
   DONE
 }
 
+enum TaskPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum ResourceType {
+  LINK
+  PHONE
+  ADDRESS
+  FORM
+  CHECKLIST
+  SCRIPT
+  PRODUCT
+}
+
+enum ScriptChannel {
+  EMAIL
+  PHONE
+  IN_PERSON
+  TEXT
+}
+
+enum UserEventStatus {
+  ACTIVE
+  PAUSED
+  DONE
+}
+
+enum UserTaskStatus {
+  TODO
+  DOING
+  DONE
+}
+
+enum LocalResourceKind {
+  BUSINESS
+  GOV
+  NONPROFIT
+  SERVICE
+}
+
+enum JobType {
+  GENERATE_RESOURCES_FOR_TASK
+  GENERATE_SCRIPTS_FOR_TASK
+  SEND_NUDGE_EMAIL
+}
+
+enum JobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
+}
+
 model User {
   id           String          @id @default(cuid())
   clerkUserId  String          @unique
@@ -32,12 +100,18 @@ model User {
   displayName  String
   imageUrl     String?
   role         UserRole        @default(USER)
+  isBanned     Boolean         @default(false)
+  bannedAt     DateTime?
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
   profile      ProfileSignals?
   lifeEvents   LifeEventState[]
   taskStates   TaskState[]
-  auditLogs    AuditLog[]
+  userEvents   UserEvent[]
+  jobs         Job[]
+  localResources LocalResource[]
+  subscriptions Subscription[]
+  usageCounters UsageCounter[]
 }
 
 model ProfileSignals {
@@ -85,12 +159,178 @@ model TaskState {
 }
 
 model AuditLog {
-  id        String   @id @default(cuid())
-  user      User?    @relation(fields: [userId], references: [id])
-  userId    String?
-  eventType String
-  detailJson Json?
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  actorUserId  String   @default("system")
+  action       String
+  targetType   String   @default("system")
+  targetId     String?
+  metadataJson Json?
+  createdAt    DateTime @default(now())
 
-  @@index([createdAt])
+  @@index([actorUserId, createdAt])
+  @@index([action, createdAt])
+}
+
+model LifeEvent {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String   @db.Text
+  icon        String?
+  tags        Json?
+  minAge      Int?
+  maxAge      Int?
+  published   Boolean  @default(true)
+  featureFlag String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tasks       TaskTemplate[]
+  userEvents  UserEvent[]
+}
+
+model TaskTemplate {
+  id               String           @id @default(cuid())
+  lifeEvent        LifeEvent        @relation(fields: [lifeEventId], references: [id])
+  lifeEventId      String
+  title            String
+  purpose          String        @db.Text
+  priority         TaskPriority     @default(MEDIUM)
+  estimatedMinutes Int?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  resources        ResourceTemplate[]
+  scripts          ScriptTemplate[]
+  localResources   LocalResource[]
+
+  @@unique([lifeEventId, title])
+}
+
+model ResourceTemplate {
+  id             String        @id @default(cuid())
+  taskTemplate   TaskTemplate  @relation(fields: [taskTemplateId], references: [id])
+  taskTemplateId String
+  type           ResourceType
+  title          String
+  description    String        @db.Text
+  url            String?
+  phone          String?
+  addressText    String?
+  stateCode      String?
+  countryCode    String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model ScriptTemplate {
+  id             String        @id @default(cuid())
+  taskTemplate   TaskTemplate  @relation(fields: [taskTemplateId], references: [id])
+  taskTemplateId String
+  channel        ScriptChannel
+  subject        String?
+  bodyMarkdown   String   @db.Text
+  variablesJson  Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model UserEvent {
+  id           String          @id @default(cuid())
+  user         User            @relation(fields: [userId], references: [id])
+  userId       String
+  lifeEvent    LifeEvent       @relation(fields: [lifeEventId], references: [id])
+  lifeEventId  String
+  status       UserEventStatus @default(ACTIVE)
+  startedAt    DateTime        @default(now())
+  completedAt  DateTime?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  userTasks    UserTask[]
+
+  @@index([userId, lifeEventId])
+  @@unique([userId, lifeEventId])
+}
+
+model UserTask {
+  id          String         @id @default(cuid())
+  userEvent   UserEvent      @relation(fields: [userEventId], references: [id])
+  userEventId String
+  title       String
+  status      UserTaskStatus @default(TODO)
+  dueDate     DateTime?
+  notes       String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  @@index([userEventId, status])
+}
+
+model LocalResource {
+  id             String             @id @default(cuid())
+  user           User               @relation(fields: [userId], references: [id])
+  userId         String
+  taskTemplate   TaskTemplate?      @relation(fields: [taskTemplateId], references: [id])
+  taskTemplateId String?
+  queryKey       String
+  label          String
+  kind           LocalResourceKind
+  url            String?
+  phone          String?
+  addressText    String?
+  lat            Float?
+  lng            Float?
+  createdAt      DateTime           @default(now())
+
+  @@index([userId, queryKey])
+  @@index([taskTemplateId])
+  @@unique([userId, queryKey, label])
+}
+
+model Job {
+  id         String    @id @default(cuid())
+  user       User?     @relation(fields: [userId], references: [id])
+  userId     String?
+  type       JobType
+  payloadJson Json
+  status     JobStatus @default(QUEUED)
+  runAt      DateTime  @default(now())
+  attempts   Int       @default(0)
+  lastError  String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  @@index([status, runAt])
+}
+
+model Subscription {
+  id                 String   @id @default(cuid())
+  user               User     @relation(fields: [userId], references: [id])
+  userId             String
+  provider           BillingProvider @default(STRIPE)
+  status             SubscriptionStatus
+  planId             String
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean  @default(false)
+  stripeCustomerId   String?
+  stripeSubscriptionId String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([userId])
+  @@index([provider, status])
+}
+
+model UsageCounter {
+  id          String   @id @default(cuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  key         String
+  periodStart DateTime
+  periodEnd   DateTime
+  used        Int      @default(0)
+  limit       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, key, periodStart])
+  @@unique([userId, key, periodStart])
 }
