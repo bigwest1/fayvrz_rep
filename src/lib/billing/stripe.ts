@@ -20,7 +20,6 @@ export function getStripe() {
   }
   const key = process.env.STRIPE_SECRET_KEY!;
   return new Stripe(key, {
-    apiVersion: "2024-06-20",
     appInfo: { name: "Fayvrz", version: "0.1.0" },
   });
 }

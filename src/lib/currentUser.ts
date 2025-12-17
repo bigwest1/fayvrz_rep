@@ -7,7 +7,7 @@ import {
 } from "./profileSignals";
 import { recordAudit } from "./audit";
 
-function resolveDisplayName(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+function resolveDisplayName(user: any) {
   return (
     user.fullName ||
     [user.firstName, user.lastName].filter(Boolean).join(" ") ||
@@ -17,11 +17,11 @@ function resolveDisplayName(user: Awaited<ReturnType<typeof clerkClient.users.ge
   );
 }
 
-function resolveEmail(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+function resolveEmail(user: any) {
   return user.primaryEmailAddress?.emailAddress || "unknown@example.com";
 }
 
-function resolveImageUrl(user: Awaited<ReturnType<typeof clerkClient.users.getUser>>) {
+function resolveImageUrl(user: any) {
   return user.imageUrl || undefined;
 }
 
@@ -45,20 +45,21 @@ function resolveRole(
   return currentRole;
 }
 
-export function getClerkAuth() {
-  const { userId } = auth();
+export async function getClerkAuth() {
+  const { userId } = await auth();
   return { userId };
 }
 
 async function getOrCreateUser() {
-  const { userId } = getClerkAuth();
+  const { userId } = await getClerkAuth();
   if (!userId) return null;
 
   const existing = await prisma.user.findUnique({
     where: { clerkUserId: userId },
   });
 
-  const clerkUser = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const clerkUser = await clerk.users.getUser(userId);
   const nextRole = resolveRole(userId, existing?.role ?? "USER", resolveEmail(clerkUser));
 
   const user = await prisma.user.upsert({
@@ -82,7 +83,7 @@ async function getOrCreateUser() {
 }
 
 export async function getCurrentUser() {
-  const { userId } = getClerkAuth();
+  const { userId } = await getClerkAuth();
   if (!userId) return null;
 
   const user = await prisma.user.findUnique({
@@ -120,7 +121,7 @@ export async function getProfileSignals(): Promise<ProfileSignals> {
 
   return sanitizeProfileSignals({
     ...defaultProfileSignals,
-    ...profile,
+    ...(profile as any),
     displayName: fallbackName,
   });
 }

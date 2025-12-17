@@ -7,7 +7,7 @@ import { rateLimit } from "@/lib/rateLimit";
 
 const schema = z.object({
   action: z.string(),
-  context: z.record(z.any()).optional(),
+  context: z.record(z.string(), z.any()).optional(),
 });
 
 export async function POST(req: Request) {

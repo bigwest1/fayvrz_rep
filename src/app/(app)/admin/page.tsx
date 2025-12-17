@@ -38,8 +38,8 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         where: userQuery
           ? {
               OR: [
-                { email: { contains: userQuery, mode: "insensitive" } },
-                { displayName: { contains: userQuery, mode: "insensitive" } },
+                { email: { contains: userQuery } },
+                { displayName: { contains: userQuery } },
               ],
             }
           : undefined,
@@ -47,7 +47,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         take: 20,
       }),
       prisma.auditLog.findMany({
-        where: logQuery ? { action: { contains: logQuery, mode: "insensitive" } } : undefined,
+        where: logQuery ? { action: { contains: logQuery } } : undefined,
         orderBy: { createdAt: "desc" },
         take: 20,
       }),

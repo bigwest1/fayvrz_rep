@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { AppShell } from "@/components/layout/AppShell";
 import { requireUser } from "@/lib/currentUser";
@@ -15,7 +16,7 @@ type Props = {
 export default async function AdminStripePage({ searchParams }: Props) {
   const admin = await requireUser();
   if (admin.role !== "OWNER") {
-    return NextResponse.redirect(new URL("/admin", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"));
+    redirect("/admin");
   }
 
   const logs = await prisma.auditLog.findMany({
@@ -41,7 +42,8 @@ export default async function AdminStripePage({ searchParams }: Props) {
     try {
       parsed = JSON.parse(payload);
     } catch {
-      return NextResponse.json({ ok: false, error: "Invalid JSON" }, { status: 400 });
+      await recordAudit("ADMIN_STRIPE_DRY_RUN", { error: "Invalid JSON" }, actor.id, { type: "Stripe", id: "invalid" });
+      return;
     }
 
     const type = parsed.type ?? "unknown";
@@ -59,7 +61,7 @@ export default async function AdminStripePage({ searchParams }: Props) {
     };
 
     await recordAudit("ADMIN_STRIPE_DRY_RUN", { type, planId }, actor.id, { type: "Stripe", id: would.stripeSubscriptionId ?? "n/a" });
-    return NextResponse.json({ ok: true, would });
+    // For now we only log; surface result via audit log.
   }
 
   return (

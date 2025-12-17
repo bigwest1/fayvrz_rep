@@ -45,7 +45,7 @@ const stateResources: Record<
 export const staticGovProvider: ResourceProvider = {
   name: "static-gov",
   async search(_query: string, context: ResourceContext): Promise<ProviderResponse> {
-    const results = [...genericResources];
+    const results: any[] = [...genericResources];
     const stateCode = context.location?.state?.toUpperCase();
     if (stateCode && stateResources[stateCode]) {
       results.push(...stateResources[stateCode]);

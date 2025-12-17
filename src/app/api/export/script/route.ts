@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { renderScript } from "@/lib/scripts/render";
@@ -9,7 +8,7 @@ import { rateLimit } from "@/lib/rateLimit";
 
 const schema = z.object({
   scriptTemplateId: z.string().min(1),
-  variables: z.record(z.any()).optional(),
+  variables: z.record(z.string(), z.any()).optional(),
 });
 
 export async function POST(req: Request) {

@@ -34,7 +34,7 @@ export function ResourceList({ resources }: { resources: Resource[] }) {
   return (
     <div className="grid gap-2">
       {resources.map((res, idx) => {
-        const title = "label" in res ? res.label : res.label;
+        const title = res.label;
         const description = "description" in res ? res.description : undefined;
         const pill =
           "type" in res && res.type

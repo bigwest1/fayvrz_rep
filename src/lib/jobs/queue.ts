@@ -1,4 +1,5 @@
 import { JobStatus, JobType } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma";
 
 export async function enqueueJob(
@@ -11,7 +12,7 @@ export async function enqueueJob(
     data: {
       userId: userId ?? undefined,
       type,
-      payloadJson: payload,
+      payloadJson: payload as Prisma.InputJsonValue,
       status: JobStatus.QUEUED,
       runAt,
     },

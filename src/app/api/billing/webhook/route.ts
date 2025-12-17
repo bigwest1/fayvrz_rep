@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { SubscriptionStatus } from "@prisma/client";
+import type Stripe from "stripe";
 import { getPlanByPriceId } from "@/lib/billing/plans";
 import { getStripe, isStripeConfigured, StripeNotConfigured } from "@/lib/billing/stripe";
 import { prisma } from "@/lib/prisma";
@@ -15,7 +17,7 @@ function normalizeStatus(status: string | null | undefined) {
 async function upsertSubscription(params: {
   clerkUserId?: string | null;
   planId: string;
-  status: string;
+  status: SubscriptionStatus;
   currentPeriodEnd?: number | null;
   cancelAtPeriodEnd?: boolean;
   stripeCustomerId?: string | null;
@@ -45,7 +47,7 @@ async function upsertSubscription(params: {
   const data = {
     userId,
     provider: "STRIPE" as const,
-    status,
+    status: status as SubscriptionStatus,
     planId,
     currentPeriodEnd: currentPeriodEnd ? new Date(currentPeriodEnd * 1000) : null,
     cancelAtPeriodEnd: Boolean(cancelAtPeriodEnd),
@@ -54,24 +56,21 @@ async function upsertSubscription(params: {
   };
 
   if (stripeSubscriptionId) {
-    return prisma.subscription.upsert({
-      where: { stripeSubscriptionId },
-      create: data,
-      update: data,
-    });
+    const existing = await prisma.subscription.findFirst({ where: { stripeSubscriptionId } });
+    if (existing) {
+      return prisma.subscription.update({ where: { id: existing.id }, data });
+    }
+    return prisma.subscription.create({ data });
   }
 
-  return prisma.subscription.upsert({
-    where: {
-      userId_provider_planId: {
-        userId,
-        provider: "STRIPE",
-        planId,
-      },
-    },
-    create: data,
-    update: data,
+  const existingUserSub = await prisma.subscription.findFirst({
+    where: { userId, provider: "STRIPE" },
+    orderBy: { updatedAt: "desc" },
   });
+  if (existingUserSub) {
+    return prisma.subscription.update({ where: { id: existingUserSub.id }, data });
+  }
+  return prisma.subscription.create({ data });
 }
 
 export async function POST(req: Request) {
@@ -119,10 +118,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true });
     }
 
-    const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
+    const subscription = (await stripe.subscriptions.retrieve(session.subscription as string)) as any;
     const subPlan =
       planId ?? getPlanByPriceId(subscription.items?.data?.[0]?.price?.id)?.id ?? "FREE";
-    const status = normalizeStatus(subscription.status);
+    const status = normalizeStatus(subscription.status) as SubscriptionStatus;
 
     await upsertSubscription({
       clerkUserId,
@@ -144,7 +143,7 @@ export async function POST(req: Request) {
   if (event.type === "customer.subscription.updated") {
     const subscription = data;
     const planId = getPlanByPriceId(subscription.items?.data?.[0]?.price?.id)?.id ?? "FREE";
-    const status = normalizeStatus(subscription.status);
+    const status = normalizeStatus(subscription.status) as SubscriptionStatus;
 
     await upsertSubscription({
       clerkUserId: subscription.metadata?.clerkUserId ?? null,

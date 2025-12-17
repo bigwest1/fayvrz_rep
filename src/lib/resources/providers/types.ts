@@ -20,6 +20,8 @@ export type ResourceResult = {
   addressText?: string;
   stateCode?: string;
   countryCode?: string;
+  lat?: number;
+  lng?: number;
   notes?: string;
   source: string;
 };

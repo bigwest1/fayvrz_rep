@@ -221,12 +221,12 @@ export default async function EventDetailPage({ params }: Props) {
                       preview={script.bodyMarkdown}
                       variables={{
                         name: user.displayName,
-                        city: profile.location?.split(",")?.[0]?.trim(),
-                        state: profile.location?.split(",")?.[1]?.trim(),
+                        city: profile.location?.split(",")?.[0]?.trim() ?? "",
+                        state: profile.location?.split(",")?.[1]?.trim() ?? "",
                       }}
                     />
                   ))}
-                  </div>
+                </div>
                 </div>
               </FocusCard>
             </Reveal>

@@ -10,12 +10,12 @@ const isPublicRoute = createRouteMatcher([
   "/api/auth-test",
 ]);
 
-export default clerkMiddleware((auth, req) => {
-  if (isPublicRoute(req)) {
-    return;
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req)) return;
+  const { userId, redirectToSignIn } = await auth();
+  if (!userId) {
+    return redirectToSignIn();
   }
-
-  auth().protect();
 });
 
 export const config = {

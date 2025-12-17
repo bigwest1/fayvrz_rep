@@ -1,7 +1,7 @@
 import { getClerkAuth, getCurrentUser } from "@/lib/currentUser";
 
 export async function GET() {
-  const { userId: clerkUserId } = getClerkAuth();
+  const { userId: clerkUserId } = await getClerkAuth();
   const dbUser = await getCurrentUser();
 
   return Response.json({

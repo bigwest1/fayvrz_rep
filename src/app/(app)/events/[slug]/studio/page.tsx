@@ -1,5 +1,4 @@
 import { notFound } from "next/navigation";
-import { useState } from "react";
 import { prisma } from "@/lib/prisma";
 import { requireUser, getProfileSignals } from "@/lib/currentUser";
 import { AppShell } from "@/components/layout/AppShell";

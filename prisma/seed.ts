@@ -1,4 +1,4 @@
-import { PrismaClient, ScriptChannel, TaskPriority } from "@prisma/client";
+import { PrismaClient, Prisma, ScriptChannel, TaskPriority } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -482,7 +482,7 @@ async function upsertLifeEvent(event: SeedEvent) {
           data: {
             subject: script.subject,
             bodyMarkdown: script.bodyMarkdown,
-            variablesJson: script.variablesJson,
+            variablesJson: script.variablesJson as Prisma.InputJsonValue,
           },
         });
       } else {
@@ -492,7 +492,7 @@ async function upsertLifeEvent(event: SeedEvent) {
             channel: script.channel,
             subject: script.subject,
             bodyMarkdown: script.bodyMarkdown,
-            variablesJson: script.variablesJson,
+            variablesJson: script.variablesJson as Prisma.InputJsonValue,
           },
         });
       }

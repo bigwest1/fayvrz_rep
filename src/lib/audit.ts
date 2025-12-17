@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 
 export async function recordAudit(
@@ -13,7 +14,7 @@ export async function recordAudit(
         actorUserId: actorUserId ?? "system",
         targetType: target?.type ?? "system",
         targetId: target?.id ?? null,
-        metadataJson: detail,
+        metadataJson: detail as Prisma.InputJsonValue,
       },
     });
   } catch (error) {

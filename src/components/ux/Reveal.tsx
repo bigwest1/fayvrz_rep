@@ -1,3 +1,4 @@
+"use client";
 import { motion, useInView } from "framer-motion";
 import { useRef } from "react";
 import { motionTokens } from "@/lib/ux/motion";
@@ -40,7 +41,7 @@ export function Reveal({ children, variant = "fadeUp", delay = 0 }: Props) {
       variants={variants[variant]}
       transition={{
         duration: motionTokens.durations.base,
-        ease: motionTokens.easings.entrance,
+        ease: motionTokens.easings.entrance as any,
         delay,
       }}
     >

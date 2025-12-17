@@ -1,14 +1,12 @@
-import { auth, clerkClient } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { getPlan, type PlanId } from "@/lib/billing/plans";
 import { getStripe, isStripeConfigured, StripeNotConfigured } from "@/lib/billing/stripe";
 import { prisma } from "@/lib/prisma";
+import { requireUser } from "@/lib/currentUser";
 
 export async function POST(req: Request) {
-  const { userId: clerkUserId } = auth();
-  if (!clerkUserId) {
-    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
-  }
+  const user = await requireUser();
+  const clerkUserId = user.clerkUserId;
 
   let planId: string | undefined;
   const contentType = req.headers.get("content-type") || "";
@@ -29,23 +27,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true });
   }
 
-  let dbUser = await prisma.user.findUnique({ where: { clerkUserId } });
-  if (!dbUser) {
-    const clerkUser = await clerkClient.users.getUser(clerkUserId);
-    dbUser = await prisma.user.create({
-      data: {
-        clerkUserId,
-        email: clerkUser.primaryEmailAddress?.emailAddress ?? "",
-        displayName:
-          clerkUser.fullName ||
-          [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(" ") ||
-          clerkUser.username ||
-          clerkUser.primaryEmailAddress?.emailAddress ||
-          "Member",
-        imageUrl: clerkUser.imageUrl ?? null,
-      },
-    });
-  }
+  const dbUser = user;
 
   let stripe;
   try {

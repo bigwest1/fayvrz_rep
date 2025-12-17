@@ -112,13 +112,6 @@ export function AppShell({ children, activePath, title, description }: AppShellP
                 );
               })}
             </nav>
-            <CommandBar
-              commands={[
-                { label: "Go home", action: () => (window.location.href = "/home") },
-                { label: "Open start", action: () => (window.location.href = "/start") },
-                { label: "Generate resources", action: () => (window.location.href = "/home") },
-              ]}
-            />
           </div>
         </div>
       </header>
